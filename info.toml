@@ -1,0 +1,7 @@
+[meta]
+name        = "TMRankings"
+author      = "DodgeTheDuck"
+category    = "Ranking"
+
+[script]
+dependencies = ["VehicleState",  "NadeoServices"]
