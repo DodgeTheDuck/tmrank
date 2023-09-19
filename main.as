@@ -2,13 +2,13 @@
 Window _window;
 
 void Main() {
-    print("--- Starting plugin ---");
+    Logger::DevMessage("--- Starting plugin ---");
     _window = Window();    
-    print("Authenticating with Nadeo...");
+    Logger::DevMessage("Authenticating with Nadeo...");
     Async::Await(Nadeo::Api::Authenticate);
-    print("Loading TMRank data...");
+    Logger::DevMessage("Loading TMRank data...");
     Async::Await(TMRank::Service::Load);
-    print("Loading Nadeo map data...");
+    Logger::DevMessage("Loading Nadeo map data...");
     Async::Await(Nadeo::Service::Load, "RPG");
     Async::Await(Nadeo::Service::Load, "Trial");
     Async::Await(Nadeo::Service::Load, "SOTD");

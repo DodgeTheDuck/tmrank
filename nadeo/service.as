@@ -9,7 +9,7 @@ namespace Nadeo {
 
             array<TMRank::MapData@> mapData = TMRank::Service::GetMapsFromStyle(style);
 
-            print("Fetching nadeo MapInfo for " + mapData.Length + " maps...");
+            Logger::DevMessage("Fetching nadeo MapInfo for " + mapData.Length + " maps...");
 
             string uidCsv = "";
             for(int i = 0; i < Math::Min(mapData.Length, MAX_MAP_FETCH); i++) {

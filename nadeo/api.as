@@ -42,8 +42,8 @@ namespace Nadeo {
 
             while(!req.Finished()) yield();
             if(req.ResponseCode() != 200) {
-                print("LeaderboardReq status " + req.ResponseCode());
-                print("Response: " + req.String());
+                Logger::Error("GetMapRecords status " + req.ResponseCode());
+                Logger::DevMessage("Response: " + req.String());
             } else {
                 auto res = Json::Parse(req.String());
                 for (uint i = 0; i < res.Length; i++) {
@@ -63,7 +63,8 @@ namespace Nadeo {
 
             while(!req.Finished()) yield();
             if(req.ResponseCode() != 200) {
-                print("GetMapInfo status " + req.ResponseCode());
+                Logger::Error("GetMapInfo status " + req.ResponseCode());
+                Logger::DevMessage("Response: " + req.String());
             } else {
                 Nadeo::Repository::AddMap(mapUid, @Nadeo::MapInfo(Json::Parse(req.String())));
             }
@@ -77,7 +78,8 @@ namespace Nadeo {
 
             while(!req.Finished()) yield();
             if(req.ResponseCode() != 200) {
-                print("GetMapInfo status " + req.ResponseCode());
+                Logger::Error("GetMapInfo status " + req.ResponseCode());
+                Logger::DevMessage("Response: " + req.String());
             } else {
                 auto res = Json::Parse(req.String());
                 for (uint i = 0; i < res["mapList"].Length; i++) {

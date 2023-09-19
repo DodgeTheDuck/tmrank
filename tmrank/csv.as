@@ -18,13 +18,11 @@ namespace TMRank {
         }
 
         string[] GetRowAtIndex(int index) {
-            try {
-                string row = _rows[index];
-                return row.Split(",");
-            } catch {
-                print("GetRowAtIndex Error");
-                return {};
+            if(index >= _rows.Length) {
+                Logger::Error("CSV Row index out of bounds: rows = " + _rows.Length + "; index = " + index);
             }
+            string row = _rows[index];
+            return row.Split(",");
         }
 
     }

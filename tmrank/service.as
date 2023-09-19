@@ -6,18 +6,18 @@ namespace TMRank {
         void Load() {
             Async::Await(TMRank::Api::GetMapData);
             Async::Await(TMRank::Service::CategoriseMaps);
-            print("Loaded TMRank map data: " + TMRank::Repository::GetMaps().Length + " maps");
+            Logger::DevMessage("Loaded TMRank map data: " + TMRank::Repository::GetMaps().Length + " maps");
         }
 
          void CategoriseMaps() {
-            print("Categorisig maps...");
-            print("Getting RPGs...");
+            Logger::DevMessage("Categorisig maps...");
+            Logger::DevMessage("Getting RPGs...");
             _mapStyles["RPG"] = _CacheMapsFromStyle("RPG");
-            print("Getting Trials...");
+            Logger::DevMessage("Getting Trials...");
             _mapStyles["Trial"] = _CacheMapsFromStyle("Trial");
-            print("Getting SOTDs...");
+            Logger::DevMessage("Getting SOTDs...");
             _mapStyles["SOTD"] = _CacheMapsFromStyle("SOTD");
-            print("Categorising complete");
+            Logger::DevMessage("Categorising complete");
         }
 
         TMRank::MapData@[] GetMapsFromStyle(string style) {
@@ -37,7 +37,7 @@ namespace TMRank {
                     result.InsertLast(mapData);
                 }
             }            
-            print("Cached " + result.Length + " maps for style " + type);
+            Logger::DevMessage("Cached " + result.Length + " maps for style " + type);
             return result;
         }
 

@@ -8,7 +8,8 @@ namespace TMRank {
             Net::HttpRequest@ req = Net::HttpGet(MAP_CSV_ENDPOINT);
             while(!req.Finished()) yield();
             if(req.ResponseCode() != 200) {
-                print("GetCsv status " + req.ResponseCode());
+                Logger::Error("GetMapData status " + req.ResponseCode());
+                Logger::DevMessage("Response " + req.String());
             }
             auto res = req.String();
             TMRank::Csv@ csv = @TMRank::Csv(res, true);
