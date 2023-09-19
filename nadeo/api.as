@@ -42,8 +42,8 @@ namespace Nadeo {
 
             while(!req.Finished()) yield();
             if(req.ResponseCode() != 200) {
+                Logger::DevMessage("GetMapRecords error: " + req.String());
                 Logger::Error("GetMapRecords status " + req.ResponseCode());
-                Logger::DevMessage("Response: " + req.String());
             } else {
                 auto res = Json::Parse(req.String());
                 for (uint i = 0; i < res.Length; i++) {

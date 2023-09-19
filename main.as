@@ -1,17 +1,19 @@
 
+// User interface
 Window _window;
 
+// Plugin entry point
 void Main() {
     Logger::DevMessage("--- Starting plugin ---");
-    _window = Window();    
+    _window = Window();
     Logger::DevMessage("Authenticating with Nadeo...");
-    Async::Await(Nadeo::Api::Authenticate);
+    Async::Await(Nadeo::Service::Authenticate);
     Logger::DevMessage("Loading TMRank data...");
     Async::Await(TMRank::Service::Load);
     Logger::DevMessage("Loading Nadeo map data...");
-    Async::Await(Nadeo::Service::Load, "RPG");
-    Async::Await(Nadeo::Service::Load, "Trial");
-    Async::Await(Nadeo::Service::Load, "SOTD");
+    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "RPG");
+    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "Trial");
+    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "SOTD");
 }
 
 void Update(float dt) {

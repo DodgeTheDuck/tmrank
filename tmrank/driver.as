@@ -4,6 +4,5 @@ namespace TMRank {
         string userId;
         string userName;
         int points;
-
     }
 }
