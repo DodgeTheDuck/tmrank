@@ -9,11 +9,12 @@ void Main() {
     Logger::DevMessage("Authenticating with Nadeo...");
     Async::Await(Nadeo::Service::Authenticate);
     Logger::DevMessage("Loading TMRank data...");
-    Async::Await(TMRank::Service::Load);
-    Logger::DevMessage("Loading Nadeo map data...");
-    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "RPG");
-    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "Trial");
-    Async::Await(Nadeo::Service::FetchMapInfoForStyle, "SOTD");
+    Async::Await(TMRank::Service::LoadMapPacks);
+    Async::Await(TMRank::Service::LoadUserData);
+    // Logger::DevMessage("Loading Nadeo map data...");
+    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "RPG");
+    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "Trial");
+    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "SOTD");
 }
 
 void Update(float dt) {

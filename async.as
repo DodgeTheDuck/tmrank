@@ -15,6 +15,13 @@ namespace Async {
         }
     }
 
+    void Await(CoroutineFuncUserdataInt64@ routine, int userData) {
+        auto cr = startnew(routine, userData);
+        while(cr.IsRunning()) {
+            yield();
+        }
+    }
+
     void Await(CoroutineFuncUserdata@ routine, ref userData) {
         auto cr = startnew(routine, userData);
         while(cr.IsRunning()) {

@@ -14,30 +14,30 @@ namespace Nadeo {
         // Use Nadeo API to get map information for each TMRank map of {style}
         void FetchMapInfoForStyle(const string&in style) {
 
-            //Sanity check: Have we actually fetched maps from TMRank?
-            if(TMRank::Repository::GetMaps().Length == 0) {
-                Logger::Error("No maps download from TMRank");
-            }
+            // //Sanity check: Have we actually fetched maps from TMRank?
+            // if(TMRank::Repository::GetMaps().Length == 0) {
+            //     Logger::Error("No maps download from TMRank");
+            // }
 
-            TMRank::MapData@[] mapData = TMRank::Service::GetMapsFromStyle(style);
+            // TMRank::MapData@[] mapData = TMRank::Service::GetMapsFromStyle(style);
 
-            while(true) {
+            // while(true) {
 
-                if(mapData.Length <= 0) break;
+            //     if(mapData.Length <= 0) break;
 
-                Logger::DevMessage("Fetching nadeo MapInfo for " + mapData.Length + " " + style + " maps...");
-                Async::Await(Nadeo::Api::GetMapInfoMultiple, _ConcatMapUids(mapData, MAX_MAP_FETCH));
+            //     Logger::DevMessage("Fetching nadeo MapInfo for " + mapData.Length + " " + style + " maps...");
+            //     Async::Await(Nadeo::Api::GetMapInfoMultiple, _ConcatMapUids(mapData, MAX_MAP_FETCH));
 
-                Nadeo::Api::MapRecordsRequest@ req = @Nadeo::Api::MapRecordsRequest();
-                req.mapIdList = _ConcatMapIds(mapData, MAX_MAP_FETCH);
-                req.accoudIdList = Internal::NadeoServices::GetAccountID();
-                Async::Await(Nadeo::Api::GetMapRecords, req);
+            //     Nadeo::Api::MapRecordsRequest@ req = @Nadeo::Api::MapRecordsRequest();
+            //     req.mapIdList = _ConcatMapIds(mapData, MAX_MAP_FETCH);
+            //     req.accoudIdList = Internal::NadeoServices::GetAccountID();
+            //     Async::Await(Nadeo::Api::GetMapRecords, req);
 
-                mapData.RemoveRange(0, 100);
+            //     mapData.RemoveRange(0, 100);
 
-                sleep(50);
+            //     sleep(50);
 
-            }
+            // }
 
         }
 
