@@ -1,6 +1,7 @@
 
 // User interface
 Window _window;
+bool _reload;
 
 // Plugin entry point
 void Main() {
@@ -11,17 +12,22 @@ void Main() {
     Logger::DevMessage("Loading TMRank data...");
     Async::Await(TMRank::Service::LoadMapPacks);
     Async::Await(TMRank::Service::LoadUserData);
-    // Logger::DevMessage("Loading Nadeo map data...");
-    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "RPG");
-    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "Trial");
-    // Async::Await(Nadeo::Service::FetchMapInfoForStyle, "SOTD");
+    _reload = false;
 }
 
 void Update(float dt) {
     _window.Update(dt);
 }
 
-void Render() {
+void RenderInterface() {
     if(!UI::IsGameUIVisible()) return;
     _window.Render();
+}
+
+void RenderMenu()
+{
+    string menuItemText = Colors::colGold + Icons::Kenney::Podium + Colors::colWhite + " TMRank";
+    if(UI::MenuItem(menuItemText, "")) {
+       _window.Show();
+    }
 }

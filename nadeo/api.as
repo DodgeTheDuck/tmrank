@@ -29,6 +29,15 @@ namespace Nadeo {
             baseUrlCore = "https://prod.trackmania.core.nadeo.online";
         }
 
+        string GetMapDownloadUrl(const string &in mapUid) {
+            string url = baseUrlLive + API_GET_MAP_INFO.Replace("{uid}", mapUid);
+            Net::HttpRequest@ req = @NadeoServices::Get("NadeoLiveServices", url);
+            req.Start();
+            while(!req.Finished()) yield();
+            auto res = Json::Parse(req.String());
+            return res["downloadUrl"];
+        }
+
         void GetMapRecords(ref@ mapRecordsRequest) {
 
             auto reqData = cast<Nadeo::Api::MapRecordsRequest@>(mapRecordsRequest);

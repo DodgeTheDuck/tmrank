@@ -1,11 +1,12 @@
 namespace Game {
 
-    void PlayMap(ref@ map) {
-        auto mapInfo = cast<Nadeo::MapInfo@>(map);
+    void PlayMap(ref@ mapRef) {
+        auto map = cast<TMRank::Model::Map@>(mapRef);
         if (Permissions::PlayLocalMap()) {
+            string url = Nadeo::Api::GetMapDownloadUrl(map.uid);
             CTrackMania@ app = cast<CTrackMania>(GetApp());
             ReturnToMenu(true);
-            app.ManiaTitleControlScriptAPI.PlayMap(mapInfo.downloadUrl, "", "");
+            app.ManiaTitleControlScriptAPI.PlayMap(url, "", "");
         }
     }
  

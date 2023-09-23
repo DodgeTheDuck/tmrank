@@ -15,6 +15,15 @@ namespace TMRank {
             _mapPackLeaders[mapPackType.typeName] = array<TMRank::Model::Driver@>();
         }
 
+        void ClearData() {
+            _mapPackUserRank.DeleteAll();
+            _mapPackLeaders.DeleteAll();
+            _mapPackMaps.DeleteAll();
+            _mapUserStats.DeleteAll();
+            _mapPackTypes.Resize(0);
+            _maps.Resize(0);
+        }
+
         TMRank::Model::MapPackType@[] GetMapPackTypes() {
             return _mapPackTypes;
         }

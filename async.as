@@ -1,6 +1,10 @@
 
 namespace Async {
 
+    void Start(CoroutineFunc@ routine) {
+        startnew(routine);
+    }
+
     void Await(CoroutineFunc@ routine) {
         auto cr = startnew(routine);
         while(cr.IsRunning()) {

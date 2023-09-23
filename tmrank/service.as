@@ -1,6 +1,11 @@
 namespace TMRank {
     namespace Service {
 
+        void Reload() {
+            Async::Await(TMRank::Service::LoadMapPacks);
+            Async::Await(TMRank::Service::LoadUserData);
+        }
+
         void LoadMapPacks() {
             TMRank::Api::GetMapPacks();
         }
