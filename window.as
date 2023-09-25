@@ -1,15 +1,12 @@
 
 class Window {
 
-    private string _colComplete = Colors::colAuthor;
-    private string _colNotComplete = Text::FormatOpenplanetColor(vec3(0.5, 0.5, 0.5));
-
+    private string _colAchieved = Colors::MEDAL_AUTHOR;
+    private string _colNotAchieved = Text::FormatOpenplanetColor(vec3(0.5, 0.5, 0.5));
     private int _mapOffset = 0;
     private int _mapLimit = 50;
-
     private int _leaderboardOffset = 0;
     private int _leaderboardLimit = 50;
-
     private bool _refreshing = false;
     private Meta::PluginCoroutine@ _refreshCr = null;
 
@@ -167,19 +164,19 @@ class Window {
                 }
 
                 array<string> medals = {
-                    Colors::colFinish + Icons::Circle,
-                    Colors::colBronze + Icons::Circle,
-                    Colors::colSilver + Icons::Circle,
-                    Colors::colGold + Icons::Circle,
-                    Colors::colAuthor + Icons::Circle,
+                    Colors::MAP_FINISH + Icons::Circle,
+                    Colors::MEDAL_BRONZE + Icons::Circle,
+                    Colors::MEDAL_SILVER + Icons::Circle,
+                    Colors::MEDAL_GOLD + Icons::Circle,
+                    Colors::MEDAL_AUTHOR + Icons::Circle,
                 };
 
                 array<string> pointStrings = {
-                    _DoPointString(Colors::colFinish, map.finishScore, userMapStats, 99999999.0f),
-                    _DoPointString(Colors::colBronze, map.bronzeScore, userMapStats, map.bronzeTime),
-                    _DoPointString(Colors::colSilver, map.silverScore, userMapStats, map.silverTime),
-                    _DoPointString(Colors::colGold, map.goldScore, userMapStats, map.goldTime),
-                    _DoPointString(Colors::colAuthor, map.authorScore, userMapStats, map.authorTime)
+                    _DoPointString(Colors::MAP_FINISH, map.finishScore, userMapStats, 99999999.0f),
+                    _DoPointString(Colors::MEDAL_BRONZE, map.bronzeScore, userMapStats, map.bronzeTime),
+                    _DoPointString(Colors::MEDAL_SILVER, map.silverScore, userMapStats, map.silverTime),
+                    _DoPointString(Colors::MEDAL_GOLD, map.goldScore, userMapStats, map.goldTime),
+                    _DoPointString(Colors::MEDAL_AUTHOR, map.authorScore, userMapStats, map.authorTime)
                 };
 
                 array<string> medalStrings = {
@@ -263,10 +260,10 @@ class Window {
 
     private void _DoLeaderboardRow(const string &in mapTypeName, TMRank::Model::Driver@ driver, bool seperate = false) {
         int rank = driver.rank;
-        string color = Colors::colWhite;
-        if(rank == 1) color = Colors::colGold;
-        if(rank == 2) color = Colors::colSilver;
-        if(rank == 3) color = Colors::colBronze;
+        string color = Colors::WHITE;
+        if(rank == 1) color = Colors::MEDAL_GOLD;
+        if(rank == 2) color = Colors::MEDAL_SILVER;
+        if(rank == 3) color = Colors::MEDAL_BRONZE;
         UI::TableNextRow();
         UI::TableNextColumn();        
         UI::Text(color + rank + "");
@@ -281,13 +278,13 @@ class Window {
 
     private string _DoPointString(string color, int points, TMRank::Model::UserMapStats@ userMapStats, float pointTime) {
         if(userMapStats != null && userMapStats.pb > 0) {            
-            string completeColor = _colNotComplete;
+            string completeColor = _colNotAchieved;
             if(userMapStats.pb <= pointTime) {
-                completeColor = _colComplete;
+                completeColor = _colAchieved;
             }
             return completeColor + points;
         } else {
-            return _colNotComplete + points;
+            return _colNotAchieved + points;
         }
     }
 

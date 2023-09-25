@@ -1,6 +1,9 @@
 namespace Images
 {
 
+    // Code inspired (copied) from TMX plugin
+    // https://github.com/GreepTheSheep/openplanet-maniaexchange-menu/blob/main/src/Utils/CachedImage.as
+
     class CachedImage
     {
         string m_url;
@@ -31,12 +34,10 @@ namespace Images
 
     CachedImage@ CachedFromURL(const string &in url)
     {
-        // Return existing image if it already exists
         auto existing = FindExisting(url);
         if (existing !is null) {
             return existing;
         }
-        // Create a new cached image object and remember it for future reference
         auto ret = CachedImage();
         ret.m_url = url;
         g_cachedImages.Set(url, @ret);

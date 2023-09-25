@@ -4,4 +4,4 @@ author      = "DodgeTheDuck"
 category    = "Ranking"
 
 [script]
-dependencies = ["VehicleState",  "NadeoServices"]
+dependencies = ["NadeoServices"]
