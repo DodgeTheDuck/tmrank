@@ -24,12 +24,12 @@ namespace TMRank {
             }
         }
 
-        void GetRankings(int64 packTypeId) {
+        void GetRankings(int64 packTypeId, int count, int offset) {
             TMRank::Model::MapPackType@ mapPackType = TMRank::Repository::GetMapPackTypeFromId(packTypeId);
             string url = EP_RANKINGS;
             url = url.Replace("{type_id}", packTypeId + "");
-            url = url.Replace("{offset}", "0");
-            url = url.Replace("{limit}", "1000");
+            url = url.Replace("{offset}", offset + "");
+            url = url.Replace("{limit}", count + "");
             url = url.Replace("{order_keyword}", "default");
             Json::Value res = Http::GetAsync(url);
 
