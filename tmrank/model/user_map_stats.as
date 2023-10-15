@@ -3,13 +3,15 @@ namespace TMRank {
     namespace Model {
         class UserMapStats {
 
-            int score;
-            int pb;
+            string MapUid;
+            int Score;
+            int PB;
 
-            UserMapStats(const Json::Value &in json) {
+            UserMapStats(const Json::Value &in json, const string &in mapUid) {
                 try {
-                    score = json["score"];
-                    pb = json["finish_finish_time"];
+                    Score = json["score"];
+                    PB = json["finish_finish_time"];
+                    MapUid = mapUid;
                 } catch {
                     throw("Unable to parse UserMapStats json");
                 }

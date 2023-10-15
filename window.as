@@ -1,6 +1,10 @@
 
 class Window {
 
+    private UI::Font@ _fontTitle;
+    private UI::Font@ _fontHeader;
+    private UI::Font@ _fontInfo;
+
     private string _colAchieved = Colors::MEDAL_AUTHOR;
     private string _colNotAchieved = Text::FormatOpenplanetColor(vec3(0.5, 0.5, 0.5));
     private int _mapOffset = 0;
@@ -24,6 +28,12 @@ class Window {
         Colors::MEDAL_AUTHOR + Icons::Circle,
     };
 
+    Window() {
+        @_fontTitle = UI::LoadFont("DroidSans-Bold.ttf", 32);
+        @_fontHeader = UI::LoadFont("DroidSans-Bold.ttf", 24);
+        @_fontInfo = UI::LoadFont("DroidSans-Bold.ttf", 18);
+    }
+
     void Update(float dt) {
         if(_refreshCr != null && _refreshCr.IsRunning() == false) {
             _refreshing = false;
@@ -43,20 +53,27 @@ class Window {
         bool open = false;
         if(UI::Begin("TMRank", open)) {
             
-            TMRank::Model::MapPackType@[] mapPackTypes = TMRank::Repository::GetMapPackTypes();
+            auto mapPacks = TMRank::Cache::GetMapPacks();
             
             UI::BeginTabBar("tb_tmrank", UI::TabBarFlags::Reorderable);
-            // Draw each map pack tab
-            for(int i = 0; i < mapPackTypes.Length; i++) {
-                TMRank::Model::MapPackType@ packType = mapPackTypes[i];
 
-                // Handle tab logic
-                bool tabItemOpen = UI::BeginTabItem(packType.typeName);
+            // Draw about tab
+
+            if(UI::BeginTabItem("About")) {
+                _RenderAbout();
+                UI::EndTabItem();
+            }
+
+            // Draw each map pack tab
+            for(int i = 0; i < mapPacks.Length; i++) {
+                auto mapPack = mapPacks[i];
+                bool tabOpen = UI::BeginTabItem(mapPack.TypeName);
                 if(UI::IsItemClicked()) {
-                    _TabItemClicked(packType.typeName);
-                } 
-                if(tabItemOpen) {
-                    _RenderTab(packType.typeName);
+                    _mapOffset = 0;
+                    _leaderboardOffset = 0;
+                }
+                if(tabOpen) {
+                    _RenderTab(mapPack);
                     UI::EndTabItem();
                 }
             }
@@ -72,46 +89,83 @@ class Window {
         UI::PopStyleColor();
     }    
 
-    private void _RenderTab(const string&in type) {
-        if(UI::BeginTable("table_tmrank_" + type, 2, UI::TableFlags::None)) {
+    private void _RenderAbout() {
+        UI::PushFont(_fontTitle);
+        UI::Text("Welcome to TMRank");
+        UI::PopFont();
+        UI::Separator();
+        UI::PushFont(_fontInfo);
+        UI::PushStyleColor(UI::Col::Text, vec4(0.8, 0.8, 0.8, 1.0));
+        UI::Text("Please wait a few seconds for the map packs to load.");
+        UI::Text("TMRank is a community driven map-style completion and ranking system.");
+        UI::PopStyleColor();
+        UI::PopFont();
+
+        UI::PushFont(_fontHeader);
+        UI::Text("How It Works");
+        UI::PopFont();
+        UI::Separator();
+        UI::Text("This plugin is essentially a front-end for Spl1nes website");
+        UI::SameLine();
+        UI::TextDisabled(Icons::ExternalLink);
+        if (UI::IsItemClicked()) OpenBrowserURL("https://tmrank.jingga.app/");
+        if(UI::IsItemHovered()) {
+            UI::BeginTooltip();
+            UI::Text("Click to open the website");
+            UI::EndTooltip();
+        }
+        UI::SameLine();
+        UI::Text(". Points for the leaderboard ");
+        UI::Text("are gained by finishing maps and obtaining medals within the various map styles. ");
+        UI::Text("\n");
+        UI::Text("Map completion, score and rankings are updated every 24h. ");        
+        UI::Text("\n");
+
+        UI::PushFont(_fontHeader);
+        UI::Text("Contribution");
+        UI::PopFont();
+        UI::Separator();
+        UI::Text("Please see Spl1nes TMRank github for information.");
+        UI::SameLine();
+        UI::TextDisabled(Icons::ExternalLink);
+        if (UI::IsItemClicked()) OpenBrowserURL("https://github.com/spl1nes/tmrank");
+        if(UI::IsItemHovered()) {
+            UI::BeginTooltip();
+            UI::Text("Click to open the website");
+            UI::EndTooltip();
+        }
+        UI::SameLine();
+
+    }
+
+    private void _RenderTab(TMRank::Model::MapPack@ mapPack) {
+        if(UI::BeginTable("table_tmrank_" + mapPack.TypeName, 2, UI::TableFlags::None)) {
             UI::TableSetupColumn("maps", UI::TableColumnFlags::WidthFixed, 700);
             UI::TableSetupColumn("leaderboard", UI::TableColumnFlags::WidthStretch, 0);
             UI::TableNextRow();
             UI::TableNextColumn();
-            if(_DrawMapList(type)) {
+            if(_DrawMapList(mapPack)) {
                 UI::TableNextColumn();
-                _DrawLeaderboard(type);
+                _DrawLeaderboard(mapPack);
             }
             UI::EndTable();
         }
-        _tabTypeCache = type;
     }
 
-    private bool _DrawMapList(const string&in type) {
+    private bool _DrawMapList(TMRank::Model::MapPack@ mapPack) {
 
-        if(_mapCache.Length == 0 || _tabTypeCache != type) {
-            _mapCache = TMRank::Repository::GetMapsFromType(type, _mapOffset, _mapLimit);
-        }
-
-        int totalMaps = TMRank::Repository::GetMapCountFromType(type);
-
-        if(_mapCache.Length == 0) {
-            _RefreshMapPack(type);
-            UI::Text("Loading " + type + "...");
-            return false;
-        }
+        auto maps = mapPack.GetMaps();
         
-        string headerText = type +" (" + 
+        string headerText = mapPack.TypeName +" (" + 
             (_mapOffset + 1) + 
             "-" + 
-            (Math::Min(_mapOffset+_mapLimit, totalMaps)) + ")"
-            + " of " + totalMaps;
+            (Math::Min(_mapOffset+_mapLimit, maps.Length)) + ")"
+            + " of " + maps.Length;
 
         UI::Text(headerText);
 
-        if(UI::BeginTable("table_tmrank_map_list_header", 2)) {
+        if(UI::BeginTable("table_tmrank_map_list_header", 1)) {
             UI::TableSetupColumn("", UI::TableColumnFlags::WidthFixed, 550);
-            UI::TableSetupColumn("", UI::TableColumnFlags::WidthFixed, 100);
 
             UI::TableNextRow();
             UI::TableNextColumn();
@@ -119,32 +173,20 @@ class Window {
                 if(_mapOffset - _mapLimit >= 0) {
                     _mapOffset -= _mapLimit;
                 }
-                _ClearMapCache();
             }
             UI::SameLine();
             if(UI::Button(Icons::ArrowRight)) {
-                print(_mapCache.Length);
-                if(_mapOffset + _mapLimit < totalMaps) {
+                if(_mapOffset + _mapLimit < maps.Length) {
                     _mapOffset += _mapLimit;
                 }
-                _ClearMapCache();
-            }
-            UI::TableNextColumn();
-            if(UI::Button(Icons::Refresh + "##1")) {
-                TMRank::Repository::ClearData();
-                Async::Start(TMRank::Service::Reload);
-                _ClearLeaderboardCache();
-                _ClearMapCache();
-                UI::EndTable();
-                return false;
-            }
+            }            
             UI::EndTable();
         }
 
 
         UI::Separator();
 
-        if(UI::BeginTable("table_tmrank_personal" + type, 8, UI::TableFlags::ScrollY)) {
+        if(UI::BeginTable("table_tmrank_personal" + mapPack.TypeName, 8, UI::TableFlags::ScrollY)) {
             UI::TableSetupColumn("Name", UI::TableColumnFlags::WidthFixed, 200);
             UI::TableSetupColumn("PB", UI::TableColumnFlags::WidthFixed, 100);
             UI::TableSetupColumn("", UI::TableColumnFlags::WidthFixed, 50);
@@ -156,49 +198,51 @@ class Window {
             
             UI::TableHeadersRow();
 
-            for(uint i = 0; i < _mapCache.Length; i++) {
+            auto maps = mapPack.GetMaps();
 
-                TMRank::Model::Map@ map = _mapCache[i];
-                TMRank::Model::UserMapStats@ userMapStats = TMRank::Repository::GetMapUserStats(map.uid);
+            for(uint i = _mapOffset; i < Math::Min(_mapOffset + _mapLimit, maps.Length); i++) {
+
+                auto map = maps[i];
 
                 UI::TableNextRow();
                 UI::TableNextColumn();
                 if(UI::Button(Icons::Play + "##" + i)) {
+                    _isOpen = false;
                     startnew(Game::PlayMap, @map);
                 }
                 UI::SameLine();
-                UI::Text(ColoredString(map.name));
+                UI::Text(ColoredString(map.Name));
                 if(UI::IsItemHovered()) {
                     UI::BeginTooltip();
-                    UI::Text(StripFormatCodes(map.name));
-                    auto img = Images::CachedFromURL(map.img);
+                    UI::Text(StripFormatCodes(map.Name));
+                    auto img = Util::Images::CachedFromURL(map.Img);
                     if(img.m_texture != null) {
                         UI::Image(img.m_texture, vec2(256, 256));
                     }
                     UI::EndTooltip();
                 }
         
-                if(userMapStats != null && userMapStats.pb > 0) {
+                if(map.UserStats != null && map.UserStats.PB > 0) {
                     UI::TableNextColumn();
-                    UI::Text(Time::Format(userMapStats.pb));
+                    UI::Text(Time::Format(map.UserStats.PB));
                 } else {
                     UI::TableNextColumn();
                 }
 
                 array<string> pointStrings = {
-                    _DoPointString(Colors::MAP_FINISH, map.finishScore, userMapStats, 9999999),
-                    _DoPointString(Colors::MEDAL_BRONZE, map.bronzeScore, userMapStats, map.bronzeTime),
-                    _DoPointString(Colors::MEDAL_SILVER, map.silverScore, userMapStats, map.silverTime),
-                    _DoPointString(Colors::MEDAL_GOLD, map.goldScore, userMapStats, map.goldTime),
-                    _DoPointString(Colors::MEDAL_AUTHOR, map.authorScore, userMapStats, map.authorTime)
+                    _DoPointString(map.FinishScore, map.UserStats, 9999999),
+                    _DoPointString(map.BronzeScore, map.UserStats, map.BronzeTime),
+                    _DoPointString(map.SilverScore, map.UserStats, map.SilverTime),
+                    _DoPointString(map.GoldScore, map.UserStats, map.GoldTime),
+                    _DoPointString(map.AuthorScore, map.UserStats, map.AuthorTime)
                 };
 
                 array<string> medalStrings = {
                     "Finish",
-                    "Bronze: " + Time::Format(map.bronzeTime),
-                    "Silver: " + Time::Format(map.silverTime),
-                    "Gold: " + Time::Format(map.bronzeTime),
-                    "AT: " + Time::Format(map.authorTime),
+                    "Bronze: " + Time::Format(map.BronzeTime),
+                    "Silver: " + Time::Format(map.SilverTime),
+                    "Gold: " + Time::Format(map.BronzeTime),
+                    "AT: " + Time::Format(map.AuthorTime),
                 };
 
                 for(int j = 0; j < pointStrings.Length; j++) {
@@ -214,8 +258,8 @@ class Window {
                 }
 
                 UI::TableNextColumn();
-                if(userMapStats != null && userMapStats.score > 0) {
-                    UI::Text(userMapStats.score + "");
+                if(map.UserStats != null && map.UserStats.Score > 0) {
+                    UI::Text(map.UserStats.Score + "");
                 }
 
             }
@@ -224,15 +268,25 @@ class Window {
         return true;
     }
 
-    private void _DrawLeaderboard(const string&in type) {
-
-        int totalDrivers = TMRank::Service::LEADERBOARD_MAX;
-
-        if(_leaderboardCache.Length == 0) {
-            _leaderboardCache = TMRank::Repository::GetLeaderboardUsers(type, _leaderboardOffset, _leaderboardLimit);
+    private string _DoPointString(int points, TMRank::Model::UserMapStats@ userStats, uint pointTime) {
+        if(userStats != null && userStats.PB > 0) {            
+            string completeColor = _colNotAchieved;
+            if(userStats.PB <= pointTime) {
+                completeColor = _colAchieved;
+            }
+            return completeColor + points;
+        } else {
+            return _colNotAchieved + points;
         }
+    }
 
-        string headerText = type + " Leaderboard (" + 
+
+    private void _DrawLeaderboard(TMRank::Model::MapPack@ mapPack) {
+
+        auto drivers = mapPack.GetDrivers();
+        int totalDrivers = drivers.Length;
+
+        string headerText = mapPack.TypeName + " Leaderboard (" + 
             (_leaderboardOffset + 1) + 
             "-" + 
             (Math::Min(_leaderboardOffset+_leaderboardLimit, totalDrivers)) + ")"
@@ -248,32 +302,48 @@ class Window {
                 if(_leaderboardOffset - _leaderboardLimit >= 0) {
                     _leaderboardOffset -= _leaderboardLimit;
                 }
-                _ClearLeaderboardCache();
             }
             UI::SameLine();
             if(UI::Button(Icons::ArrowRight + "##2")) {
                 if(_leaderboardOffset + _leaderboardLimit < totalDrivers) {
                     _leaderboardOffset += _leaderboardLimit;
                 }
-                _ClearLeaderboardCache();
             }
             UI::EndTable();
         }
 
         UI::Separator();
-        if(UI::BeginTable("table_tmrank_leaderboard" + type, 3, UI::TableFlags::ScrollY)) {
+        _DrawUserStats(mapPack);
+        UI::Separator();
+        if(UI::BeginTable("table_tmrank_leaderboard" + mapPack.TypeName, 5, UI::TableFlags::ScrollY)) {
             UI::TableSetupColumn("Rank", UI::TableColumnFlags::WidthFixed, 48);
             UI::TableSetupColumn("Name", UI::TableColumnFlags::WidthFixed, 200);
             UI::TableSetupColumn("Score", UI::TableColumnFlags::WidthFixed, 100);
+            UI::TableSetupColumn("Finishes", UI::TableColumnFlags::WidthFixed, 100);
+            UI::TableSetupColumn("ATs", UI::TableColumnFlags::WidthFixed, 100);
             UI::TableHeadersRow();
-            auto driver = TMRank::Repository::GetLeaderboardUser(type, Internal::NadeoServices::GetAccountID()); 
-            if(driver != null) {
-                _DoLeaderboardRow(type, driver, true);
-            }
-            for(int i = 0; i < _leaderboardCache.Length; i++) {
-                _DoLeaderboardRow(type, _leaderboardCache[i], _leaderboardCache[i].rank == 3);
+            for(int i = _leaderboardOffset; i < Math::Min(_leaderboardOffset + _leaderboardLimit, drivers.Length); i++) {
+                _DoLeaderboardRow(mapPack.TypeName, drivers[i], drivers[i].rank == 3);
             }
             UI::EndTable();
+        }
+    }
+
+    private void _DrawUserStats(TMRank::Model::MapPack@ mapPack) {
+        auto packStats = mapPack.GetUserPackStats();
+        if(packStats != null) {
+            UI::Text(packStats.Username);
+            UI::Separator();
+            UI::Text("Rank: " + packStats.Rank);
+            UI::Text("Maps: " + mapPack.GetMaps().Length);
+
+            float percFinish = float(packStats.Finishes) / float(mapPack.GetMaps().Length) * 100.0;
+            float percAuthor = float(packStats.Authors) / float(mapPack.GetMaps().Length) * 100.0;
+            float percGold = float(packStats.Golds) / float(mapPack.GetMaps().Length) * 100.0;
+
+            UI::Text(_medalIcons[0] + Colors::WHITE + " Finishes: " + packStats.Finishes + Colors::MAP_FINISH + " (" + Text::Format("%1.2f", percFinish) + "%)");
+            UI::Text(_medalIcons[4] + Colors::WHITE + " ATs: " + packStats.Authors + Colors::MAP_FINISH + " (" + Text::Format("%1.2f", percAuthor) + "%)");
+            UI::Text(_medalIcons[3] + Colors::WHITE + " Golds: " + packStats.Golds + Colors::MAP_FINISH + " (" + Text::Format("%1.2f", percGold) + "%)");
         }
     }
 
@@ -293,38 +363,12 @@ class Window {
         UI::TableNextColumn();
         UI::Text(color + driver.score + "");
         if(seperate) UI::Separator();
-    }
-
-    private string _DoPointString(string color, int points, TMRank::Model::UserMapStats@ userMapStats, uint pointTime) {
-        if(userMapStats != null && userMapStats.pb > 0) {            
-            string completeColor = _colNotAchieved;
-            if(userMapStats.pb <= pointTime) {
-                completeColor = _colAchieved;
-            }
-            return completeColor + points;
-        } else {
-            return _colNotAchieved + points;
-        }
-    }
-
-    private void _RefreshMapPack(const string &in typeName) {
-        if(!_refreshing) {
-            TMRank::Model::MapPackType@ mapPackType = TMRank::Repository::GetMapPackTypeFromType(typeName);
-            @_refreshCr = startnew(TMRank::Service::LoadMapData, mapPackType.typeID);
-            _refreshing = true;
-        }
-    }
-
-    private void _ClearMapCache() {
-        _mapCache.Resize(0);
-    }
-
-    private void _ClearLeaderboardCache() {
-        _leaderboardCache.Resize(0);
-    }
-
-    private void _TabItemClicked(const string &in tabType) {
-        _mapOffset = 0;
+        UI::TableNextColumn();
+        UI::Text(color + driver.finishes + "");
+        if(seperate) UI::Separator();
+        UI::TableNextColumn();
+        UI::Text(color + driver.authors + "");
+        if(seperate) UI::Separator();
     }
 
 }

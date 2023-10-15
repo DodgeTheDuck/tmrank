@@ -7,6 +7,10 @@ namespace Async {
         startnew(routine);
     }
 
+    void Start(CoroutineFuncUserdata@ routine, ref userData) {
+        startnew(routine, userData);
+    }
+
     // Yield until coroutine is complete
     void Await(CoroutineFunc@ routine) {
         auto cr = startnew(routine);

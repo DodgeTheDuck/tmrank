@@ -4,8 +4,8 @@ Window _window;
 void Main() {
     _window = Window();
     Async::Await(Nadeo::Api::Authenticate);
-    Async::Await(TMRank::Service::LoadMapPacks);
-    Async::Await(TMRank::Service::LoadUserData);
+    TMRank::Service::LoadAllMapPacks();
+    
 }
 
 void Update(float dt) {

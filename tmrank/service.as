@@ -3,23 +3,29 @@ namespace TMRank {
 
         const int LEADERBOARD_MAX = 100;
 
-        void Reload() {
-            Async::Await(TMRank::Service::LoadMapPacks);
-            Async::Await(TMRank::Service::LoadUserData);
-        }
+        void LoadAllMapPacks() {
+            auto mapPacks = TMRank::Api::GetMapPacks();
+            string userId = Internal::NadeoServices::GetAccountID();
+            auto userPackStats = TMRank::Api::GetUserPackStats(userId);
 
-        void LoadMapPacks() {
-            TMRank::Api::GetMapPacks();
-        }
+            for(int i = 0; i < userPackStats.Length; i++) {
+                auto userPackStat = userPackStats[i];
+                for(int j = 0; j < mapPacks.Length; j++) {
+                    auto mapPack = mapPacks[j];
+                    if(userPackStat.TypeID == mapPack.TypeID) {
+                        mapPack.SetUserPackStats(userPackStat);
+                    }
+                }
+            }
 
-        void LoadUserData() {
-            TMRank::Api::GetUserMapStats(Internal::NadeoServices::GetAccountID());
-        }
+            for(int i = 0; i < mapPacks.Length; i++) {
+                TMRank::Model::MapPack@ mapPack = mapPacks[i];
+                mapPack.SetMaps(TMRank::Api::GetMapsForPack(mapPack));
+                mapPack.UpdateUserStats(TMRank::Api::GetUserMapStats(mapPack, userId));
+                mapPack.SetDrivers(TMRank::Api::GetRankings(mapPack, 100, 0));                
+                TMRank::Cache::CacheMapPack(mapPack);
+            }
 
-        void LoadMapData(int64 mapPackTypeID) {
-            TMRank::Model::MapPackType@ mapPackType = TMRank::Repository::GetMapPackTypeFromId(mapPackTypeID);
-            TMRank::Api::GetMaps(mapPackTypeID);
-            TMRank::Api::GetRankings(mapPackTypeID, LEADERBOARD_MAX, 0);
         }
 
     }
