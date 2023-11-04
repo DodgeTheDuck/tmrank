@@ -5,7 +5,7 @@ namespace TMRank {
 
         void LoadAllMapPacks() {
             auto mapPacks = TMRank::Api::GetMapPacks();
-            string userId = Internal::NadeoServices::GetAccountID();
+            string userId = NadeoServices::GetAccountID();
             auto userPackStats = TMRank::Api::GetUserPackStats(userId);
 
             for(int i = 0; i < userPackStats.Length; i++) {
