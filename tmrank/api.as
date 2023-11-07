@@ -60,11 +60,13 @@ namespace TMRank {
             string url = EP_USER_PACK_STATS;
             url = url.Replace("{nadeo_user_id}", userId);
             Json::Value res = Http::GetAsync(url);
-            print(url);
             Json::Value types = res["types"];
             TMRank::Model::UserPackStats@[] result = {};
             for(int i = 0; i < types.GetKeys().Length; i++) {
-                result.InsertLast(TMRank::Model::UserPackStats(types[types.GetKeys()[i]], res["driver_name"]));
+                Json::Value type = types[types.GetKeys()[i]];
+                if(type.GetType() == Json::Type::Object) {
+                    result.InsertLast(TMRank::Model::UserPackStats(type, res["driver_name"]));
+                }
             }
             return result;
         }
